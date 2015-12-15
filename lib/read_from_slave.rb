@@ -223,7 +223,7 @@ module ReadFromSlave
     # the database name provided
     #
     def establish_slave_connection_for(slave_config)
-      conn_spec = slave_config_for(slave_config)
+      conn_spec = slave_config_for(slave_config) || ENV["REPLICA_DATABASE_URL"]
       establish_connection(conn_spec) if conn_spec
     end
 
