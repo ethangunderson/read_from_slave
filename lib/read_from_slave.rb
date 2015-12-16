@@ -83,6 +83,16 @@ module ReadFromSlave
     end
 
     def install_with_methods!
+      ActiveRecord::Base.class_eval <<-EOM
+        def self.with_primary_slave(&block)
+          Thread.current[:with_primary_count] ||= 0
+          Thread.current[:with_primary_count] += 1
+          yield
+        ensure
+          Thread.current[:with_primary_count] -= 1
+        end
+      EOM
+
       ActiveRecord::Base.connection.instance_variable_get(:@config)[:slaves].each_key do |slave_name|
         ActiveRecord::Base.class_eval <<-EOM
           def self.with_#{slave_name}(&block)
